@@ -1,0 +1,165 @@
+openapi: 3.0.0
+info:
+  title: Verve API
+  version: 1.0.0
+  description: Digital wallet and badge system
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local development server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        username:
+          type: string
+          example: "john.doe"
+        displayName:
+          type: string
+          example: "John Doe"
+        profilePhotoURL:
+          type: string
+          format: uri
+          example: "https://example.com/photo.jpg"
+        pinRequiredForTransfer:
+          type: boolean
+          example: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - username
+
+    Wallet:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        userId:
+          type: integer
+          format: int64
+        currency:
+          type: string
+          example: "USD"
+        balance:
+          type: integer
+          format: int64
+          example: 10000
+        isActive:
+          type: boolean
+        canTransfer:
+          type: boolean
+
+paths:
+  /users:
+    post:
+      summary: Create a new user
+      operationId: createUser
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                pin:
+                  type: string
+                roles:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - Admin only
+
+  /auth/login:
+    post:
+      summary: Authenticate user
+      operationId: loginUser
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Invalid credentials
+
+  /wallets:
+    post:
+      summary: Create a new wallet
+      operationId: createWallet
+      security:
+        - bearerAuth: []
+      tags:
+        - wallets
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: integer
+                  format: int64
+                currency:
+                  type: string
+      responses:
+        '201':
+          description: Wallet created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Wallet'

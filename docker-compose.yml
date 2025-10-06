@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: verve_db
+    environment:
+      POSTGRES_USER: verve_user
+      POSTGRES_PASSWORD: verve_password
+      POSTGRES_DB: verve_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - verve_network
+
+  app:
+    build: .
+    container_name: verve_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_DSN=postgres://verve_user:verve_password@db:5432/verve_db?sslmode=disable
+    networks:
+      - verve_network
+
+volumes:
+  postgres_data:
+
+networks:
+  verve_network:
+    driver: bridge

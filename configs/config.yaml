@@ -1,0 +1,8 @@
+server:
+  address: ":8080"
+database:
+  dsn: "postgres://verve_user:verve_password@localhost:5432/verve_db?sslmode=disable"
+treasury:
+  grant_amount_per_user: 100
+  username: "treasury@system.local"
+  grant_delay_ms: 100 # Delay between individual user grants in milliseconds

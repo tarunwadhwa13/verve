@@ -1,0 +1,966 @@
+basePath: /api
+definitions:
+  internal_api.BadgeResponse:
+    properties:
+      badge:
+        $ref: '#/definitions/verve_internal_models.Badge'
+      rules:
+        items:
+          $ref: '#/definitions/verve_internal_models.AchievementRule'
+        type: array
+    type: object
+  internal_api.CreateBadgeRequest:
+    properties:
+      description:
+        example: Awarded to users who complete all achievements
+        type: string
+      icon_url:
+        example: https://example.com/badges/master.png
+        type: string
+      name:
+        example: Achievement Master
+        type: string
+      points:
+        example: 100
+        type: integer
+      rules:
+        items:
+          $ref: '#/definitions/verve_internal_models.AchievementRule'
+        type: array
+    required:
+    - description
+    - name
+    type: object
+  internal_api.CreateUserRequest:
+    properties:
+      password:
+        example: secure_password
+        type: string
+      pin:
+        example: "1234"
+        type: string
+      roles:
+        example:
+        - '[''user'''
+        - '''admin'']'
+        items:
+          type: string
+        type: array
+      username:
+        example: john.doe
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  internal_api.CreateWalletRequest:
+    properties:
+      currency:
+        example: USD
+        type: string
+    required:
+    - currency
+    type: object
+  internal_api.ErrorResponse:
+    properties:
+      error:
+        example: Invalid request
+        type: string
+    type: object
+  internal_api.LoginRequest:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      password:
+        example: secure_password
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  internal_api.LoginResponse:
+    properties:
+      refresh_token:
+        example: ""
+        type: string
+      token:
+        example: eyJhbGciOiJS...
+        type: string
+      user:
+        properties:
+          username:
+            example: john.doe@example.com
+            type: string
+        type: object
+    type: object
+  internal_api.SuccessResponse:
+    properties:
+      message:
+        example: Operation successful
+        type: string
+    type: object
+  internal_api.TransferRequest:
+    properties:
+      amount:
+        example: 1000
+        type: integer
+      is_anonymous:
+        example: false
+        type: boolean
+      pin:
+        example: "1234"
+        type: string
+      receiver_wallet_id:
+        example: 2
+        type: integer
+      sender_wallet_id:
+        example: 1
+        type: integer
+    required:
+    - amount
+    - receiver_wallet_id
+    - sender_wallet_id
+    type: object
+  internal_api.UpdateBadgeRequest:
+    properties:
+      description:
+        example: Awarded to users who complete all achievements
+        type: string
+      icon_url:
+        example: https://example.com/badges/master.png
+        type: string
+      is_active:
+        example: true
+        type: boolean
+      name:
+        example: Achievement Master
+        type: string
+      points:
+        example: 100
+        type: integer
+    type: object
+  internal_api.UpdateUserRequest:
+    properties:
+      display_name:
+        example: John Doe
+        type: string
+      pin_required_for_transfer:
+        example: true
+        type: boolean
+      profile_photo_url:
+        example: https://example.com/photo.jpg
+        type: string
+    type: object
+  verve_internal_models.AchievementRule:
+    properties:
+      badge_id:
+        type: integer
+      condition_value:
+        items:
+          type: integer
+        type: array
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      rule_type:
+        type: string
+    type: object
+  verve_internal_models.Badge:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      description:
+        type: string
+      icon_url:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      name:
+        type: string
+      points:
+        type: integer
+    type: object
+  verve_internal_models.Transfer:
+    properties:
+      amount:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_anonymous:
+        type: boolean
+      receiver_wallet_id:
+        type: integer
+      sender_wallet_id:
+        type: integer
+      status:
+        $ref: '#/definitions/verve_internal_models.TransferStatus'
+      updated_at:
+        type: string
+    type: object
+  verve_internal_models.TransferStatus:
+    enum:
+    - pending
+    - completed
+    - failed
+    type: string
+    x-enum-varnames:
+    - TransferStatusPending
+    - TransferStatusCompleted
+    - TransferStatusFailed
+  verve_internal_models.User:
+    description: User information including display name and profile settings
+    properties:
+      created_at:
+        type: string
+      display_name:
+        example: John Doe
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      id:
+        example: 1
+        type: integer
+      pin_required_for_transfer:
+        example: true
+        type: boolean
+      profile_photo_url:
+        example: https://example.com/photo.jpg
+        type: string
+      provider:
+        description: OAuth provider (google, okta, or local)
+        example: google
+        type: string
+      provider_user_id:
+        description: ID from the OAuth provider
+        type: string
+      roles:
+        example:
+        - '[''user'''
+        - '''admin'']'
+        items:
+          type: string
+        type: array
+      updated_at:
+        type: string
+      username:
+        example: john.doe
+        type: string
+    type: object
+  verve_internal_models.UserBadge:
+    properties:
+      awarded_at:
+        type: string
+      awarded_by:
+        description: Pointer to allow NULL for system-awarded badges
+        type: integer
+      badge_id:
+        type: integer
+      id:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  verve_internal_models.Wallet:
+    description: A digital wallet that can hold a specific currency
+    properties:
+      balance:
+        example: 10000
+        type: integer
+      can_transfer:
+        example: true
+        type: boolean
+      created_at:
+        type: string
+      currency:
+        example: USD
+        type: string
+      deleted_at:
+        type: string
+      id:
+        example: 1
+        type: integer
+      is_active:
+        example: true
+        type: boolean
+      user_id:
+        example: 1
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  title: Verve API
+  version: "1.0"
+paths:
+  /auth/link/oauth:
+    post:
+      consumes:
+      - application/json
+      description: Link an OAuth account to the current user's account
+      parameters:
+      - description: OAuth provider (google/okta)
+        in: query
+        name: provider
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.SuccessResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Link OAuth account
+      tags:
+      - auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user and return a JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.LoginResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      summary: User login
+      tags:
+      - auth
+  /auth/unlink/oauth:
+    post:
+      description: Remove OAuth provider from user account
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.SuccessResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Unlink OAuth account
+      tags:
+      - auth
+  /badges:
+    get:
+      description: Get a list of all badges (admins see all, users see only active)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/verve_internal_models.Badge'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: List all badges
+      tags:
+      - badges
+    post:
+      consumes:
+      - application/json
+      description: Create a new badge with optional achievement rules
+      parameters:
+      - description: Badge details
+        in: body
+        name: badge
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api.CreateBadgeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created badge
+          schema:
+            $ref: '#/definitions/verve_internal_models.Badge'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create a new badge
+      tags:
+      - badges
+  /badges/{id}:
+    get:
+      description: Get a badge's details and achievement rules
+      parameters:
+      - description: Badge ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.BadgeResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "404":
+          description: Badge not found
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get a badge
+      tags:
+      - badges
+    put:
+      consumes:
+      - application/json
+      description: Update an existing badge's details
+      parameters:
+      - description: Badge ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Badge details to update
+        in: body
+        name: badge
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api.UpdateBadgeRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/verve_internal_models.Badge'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "404":
+          description: Badge not found
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update a badge
+      tags:
+      - badges
+  /badges/{id}/award/{user_id}:
+    post:
+      description: Award a badge to a specific user
+      parameters:
+      - description: Badge ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_api.SuccessResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "404":
+          description: Badge or user not found
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Award badge to user
+      tags:
+      - badges
+  /badges/{id}/holders:
+    get:
+      description: Get all users who have been awarded a specific badge
+      parameters:
+      - description: Badge ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/verve_internal_models.UserBadge'
+            type: array
+        "400":
+          description: Invalid badge ID
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "404":
+          description: Badge not found
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get badge holders
+      tags:
+      - badges
+  /transfer:
+    post:
+      consumes:
+      - application/json
+      description: Create a new transfer between wallets
+      parameters:
+      - description: Transfer details
+        in: body
+        name: transfer
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api.TransferRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/verve_internal_models.Transfer'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "403":
+          description: Insufficient funds or invalid PIN
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Initiate a transfer
+      tags:
+      - transfers
+  /transfer/{id}:
+    get:
+      description: Get the current status of a transfer
+      parameters:
+      - description: Transfer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/verve_internal_models.Transfer'
+        "400":
+          description: Invalid transfer ID
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "404":
+          description: Transfer not found
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get transfer status
+      tags:
+      - transfers
+  /user/{id}:
+    get:
+      description: Get details of a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/verve_internal_models.User'
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user details
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update the authenticated user's profile information
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User details to update
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/verve_internal_models.User'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "403":
+          description: Forbidden - Can only update own profile
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update user profile
+      tags:
+      - users
+  /user/{id}/badges:
+    get:
+      description: Get all badges that have been awarded to the authenticated user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/verve_internal_models.UserBadge'
+            type: array
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "403":
+          description: Forbidden - Can only view your own badges
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user's badges
+      tags:
+      - badges
+  /user/{id}/wallets:
+    get:
+      description: Get all wallets belonging to the authenticated user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/verve_internal_models.Wallet'
+            type: array
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "403":
+          description: Forbidden - Can only view your own wallets
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user wallets
+      tags:
+      - wallets
+    post:
+      consumes:
+      - application/json
+      description: Create a new wallet for the authenticated user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Wallet details
+        in: body
+        name: wallet
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api.CreateWalletRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/verve_internal_models.Wallet'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "403":
+          description: Forbidden - Can only create wallets for yourself
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create wallet
+      tags:
+      - wallets
+  /user/{user_id}/wallets/{wallet_id}:
+    get:
+      description: Get details of a specific wallet belonging to the authenticated
+        user
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: integer
+      - description: Wallet ID
+        in: path
+        name: wallet_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/verve_internal_models.Wallet'
+        "400":
+          description: Invalid wallet ID
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "403":
+          description: Forbidden - Can only view your own wallet
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "404":
+          description: Wallet not found
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get wallet details
+      tags:
+      - wallets
+  /user/connected:
+    get:
+      description: Get a list of all users in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/verve_internal_models.User'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "404":
+          description: No users found
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: List all users
+      tags:
+      - users
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with specified roles (admin only)
+      parameters:
+      - description: User details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/internal_api.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/verve_internal_models.User'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+        "403":
+          description: Forbidden - Admin only
+          schema:
+            $ref: '#/definitions/internal_api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create new user
+      tags:
+      - users
+schemes:
+- http
+- https
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

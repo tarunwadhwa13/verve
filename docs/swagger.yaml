@@ -1,15 +1,15 @@
 basePath: /api
 definitions:
-  internal_api.BadgeResponse:
+  api.BadgeResponse:
     properties:
       badge:
-        $ref: '#/definitions/verve_internal_models.Badge'
+        $ref: '#/definitions/models.Badge'
       rules:
         items:
-          $ref: '#/definitions/verve_internal_models.AchievementRule'
+          $ref: '#/definitions/models.AchievementRule'
         type: array
     type: object
-  internal_api.CreateBadgeRequest:
+  api.CreateBadgeRequest:
     properties:
       description:
         example: Awarded to users who complete all achievements
@@ -25,13 +25,13 @@ definitions:
         type: integer
       rules:
         items:
-          $ref: '#/definitions/verve_internal_models.AchievementRule'
+          $ref: '#/definitions/models.AchievementRule'
         type: array
     required:
     - description
     - name
     type: object
-  internal_api.CreateUserRequest:
+  api.CreateUserRequest:
     properties:
       password:
         example: secure_password
@@ -53,7 +53,7 @@ definitions:
     - password
     - username
     type: object
-  internal_api.CreateWalletRequest:
+  api.CreateWalletRequest:
     properties:
       currency:
         example: USD
@@ -61,25 +61,25 @@ definitions:
     required:
     - currency
     type: object
-  internal_api.ErrorResponse:
+  api.ErrorResponse:
     properties:
       error:
         example: Invalid request
         type: string
     type: object
-  internal_api.LoginRequest:
+  api.LoginRequest:
     properties:
-      email:
-        example: john.doe@example.com
-        type: string
       password:
         example: secure_password
         type: string
+      username:
+        example: john.doe@example.com
+        type: string
     required:
-    - email
     - password
+    - username
     type: object
-  internal_api.LoginResponse:
+  api.LoginResponse:
     properties:
       refresh_token:
         example: ""
@@ -94,13 +94,13 @@ definitions:
             type: string
         type: object
     type: object
-  internal_api.SuccessResponse:
+  api.SuccessResponse:
     properties:
       message:
         example: Operation successful
         type: string
     type: object
-  internal_api.TransferRequest:
+  api.TransferRequest:
     properties:
       amount:
         example: 1000
@@ -122,7 +122,7 @@ definitions:
     - receiver_wallet_id
     - sender_wallet_id
     type: object
-  internal_api.UpdateBadgeRequest:
+  api.UpdateBadgeRequest:
     properties:
       description:
         example: Awarded to users who complete all achievements
@@ -140,7 +140,7 @@ definitions:
         example: 100
         type: integer
     type: object
-  internal_api.UpdateUserRequest:
+  api.UpdateUserRequest:
     properties:
       display_name:
         example: John Doe
@@ -152,14 +152,13 @@ definitions:
         example: https://example.com/photo.jpg
         type: string
     type: object
-  verve_internal_models.AchievementRule:
+  models.AchievementRule:
     properties:
       badge_id:
         type: integer
       condition_value:
-        items:
-          type: integer
-        type: array
+        example: '{"min_transactions":10,"time_frame":"24h"}'
+        type: string
       created_at:
         type: string
       created_by:
@@ -171,7 +170,7 @@ definitions:
       rule_type:
         type: string
     type: object
-  verve_internal_models.Badge:
+  models.Badge:
     properties:
       created_at:
         type: string
@@ -190,7 +189,7 @@ definitions:
       points:
         type: integer
     type: object
-  verve_internal_models.Transfer:
+  models.Transfer:
     properties:
       amount:
         type: integer
@@ -205,11 +204,11 @@ definitions:
       sender_wallet_id:
         type: integer
       status:
-        $ref: '#/definitions/verve_internal_models.TransferStatus'
+        $ref: '#/definitions/models.TransferStatus'
       updated_at:
         type: string
     type: object
-  verve_internal_models.TransferStatus:
+  models.TransferStatus:
     enum:
     - pending
     - completed
@@ -219,7 +218,7 @@ definitions:
     - TransferStatusPending
     - TransferStatusCompleted
     - TransferStatusFailed
-  verve_internal_models.User:
+  models.User:
     description: User information including display name and profile settings
     properties:
       created_at:
@@ -259,7 +258,7 @@ definitions:
         example: john.doe
         type: string
     type: object
-  verve_internal_models.UserBadge:
+  models.UserBadge:
     properties:
       awarded_at:
         type: string
@@ -273,7 +272,7 @@ definitions:
       user_id:
         type: integer
     type: object
-  verve_internal_models.Wallet:
+  models.Wallet:
     description: A digital wallet that can hold a specific currency
     properties:
       balance:
@@ -305,6 +304,170 @@ info:
   title: Verve API
   version: "1.0"
 paths:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user and return a JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/api.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.LoginResponse'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Invalid credentials
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: User login
+      tags:
+      - auth
+  /api/user/{id}:
+    get:
+      description: Get details of a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Get user details
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update the authenticated user's profile information
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User details to update
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/api.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "403":
+          description: Forbidden - Can only update own profile
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Update user profile
+      tags:
+      - users
+  /api/user/connected:
+    get:
+      description: Get a list of all users in the system
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "404":
+          description: No users found
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: List all users
+      tags:
+      - users
+  /api/user/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user with specified roles (admin only)
+      parameters:
+      - description: User details
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/api.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "403":
+          description: Forbidden - Admin only
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: Create new user
+      tags:
+      - users
   /auth/link/oauth:
     post:
       consumes:
@@ -322,15 +485,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_api.SuccessResponse'
+            $ref: '#/definitions/api.SuccessResponse'
         "400":
           description: Invalid request
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Link OAuth account
@@ -340,30 +503,30 @@ paths:
     post:
       consumes:
       - application/json
-      description: Authenticate a user and return a JWT token
+      description: Authenticate user with username and password
       parameters:
       - description: Login credentials
         in: body
         name: credentials
         required: true
         schema:
-          $ref: '#/definitions/internal_api.LoginRequest'
+          $ref: '#/definitions/api.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_api.LoginResponse'
+            $ref: '#/definitions/api.LoginResponse'
         "400":
           description: Invalid request
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "401":
           description: Invalid credentials
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
-      summary: User login
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Login with username and password
       tags:
       - auth
   /auth/unlink/oauth:
@@ -375,15 +538,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_api.SuccessResponse'
+            $ref: '#/definitions/api.SuccessResponse'
         "400":
           description: Invalid request
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Unlink OAuth account
@@ -399,12 +562,12 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/verve_internal_models.Badge'
+              $ref: '#/definitions/models.Badge'
             type: array
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: List all badges
@@ -420,26 +583,26 @@ paths:
         name: badge
         required: true
         schema:
-          $ref: '#/definitions/internal_api.CreateBadgeRequest'
+          $ref: '#/definitions/api.CreateBadgeRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created badge
           schema:
-            $ref: '#/definitions/verve_internal_models.Badge'
+            $ref: '#/definitions/models.Badge'
         "400":
           description: Invalid request
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Create a new badge
@@ -460,15 +623,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_api.BadgeResponse'
+            $ref: '#/definitions/api.BadgeResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "404":
           description: Badge not found
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Get a badge
@@ -489,30 +652,30 @@ paths:
         name: badge
         required: true
         schema:
-          $ref: '#/definitions/internal_api.UpdateBadgeRequest'
+          $ref: '#/definitions/api.UpdateBadgeRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/verve_internal_models.Badge'
+            $ref: '#/definitions/models.Badge'
         "400":
           description: Invalid request
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "404":
           description: Badge not found
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Update a badge
@@ -538,23 +701,23 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/internal_api.SuccessResponse'
+            $ref: '#/definitions/api.SuccessResponse'
         "400":
           description: Invalid request
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "403":
           description: Forbidden
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "404":
           description: Badge or user not found
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Award badge to user
@@ -576,20 +739,20 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/verve_internal_models.UserBadge'
+              $ref: '#/definitions/models.UserBadge'
             type: array
         "400":
           description: Invalid badge ID
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "404":
           description: Badge not found
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Get badge holders
@@ -606,26 +769,26 @@ paths:
         name: transfer
         required: true
         schema:
-          $ref: '#/definitions/internal_api.TransferRequest'
+          $ref: '#/definitions/api.TransferRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/verve_internal_models.Transfer'
+            $ref: '#/definitions/models.Transfer'
         "400":
           description: Invalid request
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "403":
           description: Insufficient funds or invalid PIN
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Initiate a transfer
@@ -646,97 +809,24 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/verve_internal_models.Transfer'
+            $ref: '#/definitions/models.Transfer'
         "400":
           description: Invalid transfer ID
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "404":
           description: Transfer not found
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Get transfer status
       tags:
       - transfers
-  /user/{id}:
-    get:
-      description: Get details of a specific user
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/verve_internal_models.User'
-        "400":
-          description: Invalid user ID
-          schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
-        "404":
-          description: User not found
-          schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Get user details
-      tags:
-      - users
-    put:
-      consumes:
-      - application/json
-      description: Update the authenticated user's profile information
-      parameters:
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: User details to update
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/internal_api.UpdateUserRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/verve_internal_models.User'
-        "400":
-          description: Invalid request
-          schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
-        "403":
-          description: Forbidden - Can only update own profile
-          schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Update user profile
-      tags:
-      - users
   /user/{id}/badges:
     get:
       description: Get all badges that have been awarded to the authenticated user
@@ -753,24 +843,24 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/verve_internal_models.UserBadge'
+              $ref: '#/definitions/models.UserBadge'
             type: array
         "400":
           description: Invalid user ID
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "403":
           description: Forbidden - Can only view your own badges
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "404":
           description: User not found
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Get user's badges
@@ -792,20 +882,20 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/verve_internal_models.Wallet'
+              $ref: '#/definitions/models.Wallet'
             type: array
         "400":
           description: Invalid user ID
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "403":
           description: Forbidden - Can only view your own wallets
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Get user wallets
@@ -826,26 +916,26 @@ paths:
         name: wallet
         required: true
         schema:
-          $ref: '#/definitions/internal_api.CreateWalletRequest'
+          $ref: '#/definitions/api.CreateWalletRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/verve_internal_models.Wallet'
+            $ref: '#/definitions/models.Wallet'
         "400":
           description: Invalid request
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "403":
           description: Forbidden - Can only create wallets for yourself
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Create wallet
@@ -872,89 +962,28 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/verve_internal_models.Wallet'
+            $ref: '#/definitions/models.Wallet'
         "400":
           description: Invalid wallet ID
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "403":
           description: Forbidden - Can only view your own wallet
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
         "404":
           description: Wallet not found
           schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
+            $ref: '#/definitions/api.ErrorResponse'
       security:
       - ApiKeyAuth: []
       summary: Get wallet details
       tags:
       - wallets
-  /user/connected:
-    get:
-      description: Get a list of all users in the system
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/verve_internal_models.User'
-            type: array
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
-        "404":
-          description: No users found
-          schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: List all users
-      tags:
-      - users
-  /user/register:
-    post:
-      consumes:
-      - application/json
-      description: Create a new user with specified roles (admin only)
-      parameters:
-      - description: User details
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/internal_api.CreateUserRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/verve_internal_models.User'
-        "400":
-          description: Invalid request
-          schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
-        "403":
-          description: Forbidden - Admin only
-          schema:
-            $ref: '#/definitions/internal_api.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
-      summary: Create new user
-      tags:
-      - users
 schemes:
 - http
 - https

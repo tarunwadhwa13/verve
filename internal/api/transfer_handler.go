@@ -27,7 +27,7 @@ func RegisterTransferRoutes(router *gin.Engine, transferService *services.Transf
 // @Accept json
 // @Produce json
 // @Param transfer body TransferRequest true "Transfer details"
-// @Success 200 {object} verve_internal_models.Transfer
+// @Success 200 {object} models.Transfer
 // @Failure 400 {object} ErrorResponse "Invalid request"
 // @Failure 401 {object} ErrorResponse "Unauthorized"
 // @Failure 403 {object} ErrorResponse "Insufficient funds or invalid PIN"
@@ -67,7 +67,7 @@ func InitiateTransferHandler(transferService *services.TransferService) gin.Hand
 // @Tags transfers
 // @Produce json
 // @Param id path integer true "Transfer ID"
-// @Success 200 {object} verve_internal_models.Transfer
+// @Success 200 {object} models.Transfer
 // @Failure 400 {object} ErrorResponse "Invalid transfer ID"
 // @Failure 401 {object} ErrorResponse "Unauthorized"
 // @Failure 404 {object} ErrorResponse "Transfer not found"

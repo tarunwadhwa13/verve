@@ -16,11 +16,13 @@ type Badge struct {
 	IsActive    bool      `json:"is_active"`
 }
 
+// AchievementRule defines the conditions for earning a badge
+// swagger:model
 type AchievementRule struct {
 	ID             int             `json:"id"`
 	BadgeID        int             `json:"badge_id"`
 	RuleType       string          `json:"rule_type"`
-	ConditionValue json.RawMessage `json:"condition_value"`
+	ConditionValue json.RawMessage `json:"condition_value" swaggertype:"string" example:"{\"min_transactions\":10,\"time_frame\":\"24h\"}"`
 	CreatedAt      time.Time       `json:"created_at"`
 	CreatedBy      int             `json:"created_by"`
 	IsActive       bool            `json:"is_active"`

@@ -32,7 +32,7 @@ func RegisterWalletRoutes(router *gin.Engine, walletService *services.WalletServ
 // @Produce json
 // @Param id path integer true "User ID"
 // @Param wallet body CreateWalletRequest true "Wallet details"
-// @Success 201 {object} verve_internal_models.Wallet
+// @Success 201 {object} models.Wallet
 // @Failure 400 {object} ErrorResponse "Invalid request"
 // @Failure 401 {object} ErrorResponse "Unauthorized"
 // @Failure 403 {object} ErrorResponse "Forbidden - Can only create wallets for yourself"
@@ -74,7 +74,7 @@ func CreateWalletHandler(walletService *services.WalletService) gin.HandlerFunc 
 // @Tags wallets
 // @Produce json
 // @Param id path integer true "User ID"
-// @Success 200 {array} verve_internal_models.Wallet
+// @Success 200 {array} models.Wallet
 // @Failure 400 {object} ErrorResponse "Invalid user ID"
 // @Failure 401 {object} ErrorResponse "Unauthorized"
 // @Failure 403 {object} ErrorResponse "Forbidden - Can only view your own wallets"
@@ -111,7 +111,7 @@ func GetUserWalletsHandler(walletService *services.WalletService) gin.HandlerFun
 // @Produce json
 // @Param user_id path integer true "User ID"
 // @Param wallet_id path integer true "Wallet ID"
-// @Success 200 {object} verve_internal_models.Wallet
+// @Success 200 {object} models.Wallet
 // @Failure 400 {object} ErrorResponse "Invalid wallet ID"
 // @Failure 401 {object} ErrorResponse "Unauthorized"
 // @Failure 403 {object} ErrorResponse "Forbidden - Can only view your own wallet"

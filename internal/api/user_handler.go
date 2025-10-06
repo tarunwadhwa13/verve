@@ -26,6 +26,18 @@ func RegisterUserRoutes(router *gin.Engine, userService *services.UserService) {
 	router.POST("/api/auth/login", LoginHandler(userService))
 }
 
+// LoginHandler authenticates users
+// @Summary User login
+// @Description Authenticate user with username and password
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param credentials body LoginRequest true "Login credentials"
+// @Success 200 {object} LoginResponse
+// @Failure 400 {object} ErrorResponse "Invalid request"
+// @Failure 401 {object} ErrorResponse "Invalid credentials"
+// @Router /api/auth/login [post]
+
 // UpdateUserHandler handles user profile updates
 // @Summary Update user profile
 // @Description Update the authenticated user's profile information
@@ -34,12 +46,12 @@ func RegisterUserRoutes(router *gin.Engine, userService *services.UserService) {
 // @Produce json
 // @Param id path integer true "User ID"
 // @Param user body UpdateUserRequest true "User details to update"
-// @Success 200 {object} verve_internal_models.User
+// @Success 200 {object} models.User
 // @Failure 400 {object} ErrorResponse "Invalid request"
 // @Failure 401 {object} ErrorResponse "Unauthorized"
 // @Failure 403 {object} ErrorResponse "Forbidden - Can only update own profile"
 // @Security ApiKeyAuth
-// @Router /user/{id} [put]
+// @Router /api/user/{id} [put]
 func UpdateUserHandler(userService *services.UserService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.GetInt("userID")
@@ -80,12 +92,12 @@ func UpdateUserHandler(userService *services.UserService) gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param user body CreateUserRequest true "User details"
-// @Success 201 {object} verve_internal_models.User
+// @Success 201 {object} models.User
 // @Failure 400 {object} ErrorResponse "Invalid request"
 // @Failure 401 {object} ErrorResponse "Unauthorized"
 // @Failure 403 {object} ErrorResponse "Forbidden - Admin only"
 // @Security ApiKeyAuth
-// @Router /user/register [post]
+// @Router /api/user/register [post]
 func CreateUserHandler(userService *services.UserService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req CreateUserRequest
@@ -127,12 +139,12 @@ func SetPinHandler(userService *services.UserService) gin.HandlerFunc {
 // @Tags users
 // @Produce json
 // @Param id path integer true "User ID"
-// @Success 200 {object} verve_internal_models.User
+// @Success 200 {object} models.User
 // @Failure 400 {object} ErrorResponse "Invalid user ID"
 // @Failure 401 {object} ErrorResponse "Unauthorized"
 // @Failure 404 {object} ErrorResponse "User not found"
 // @Security ApiKeyAuth
-// @Router /user/{id} [get]
+// @Router /api/user/{id} [get]
 func GetUserHandler(userService *services.UserService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id, err := strconv.Atoi(c.Param("id"))
@@ -155,11 +167,11 @@ func GetUserHandler(userService *services.UserService) gin.HandlerFunc {
 // @Description Get a list of all users in the system
 // @Tags users
 // @Produce json
-// @Success 200 {array} verve_internal_models.User
+// @Success 200 {array} models.User
 // @Failure 401 {object} ErrorResponse "Unauthorized"
 // @Failure 404 {object} ErrorResponse "No users found"
 // @Security ApiKeyAuth
-// @Router /user/connected [get]
+// @Router /api/user/connected [get]
 func GetAllUsersHandler(userService *services.UserService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		user, err := userService.GetAllUsers()
@@ -181,7 +193,7 @@ func GetAllUsersHandler(userService *services.UserService) gin.HandlerFunc {
 // @Success 200 {object} LoginResponse
 // @Failure 400 {object} ErrorResponse "Invalid request"
 // @Failure 401 {object} ErrorResponse "Invalid credentials"
-// @Router /auth/login [post]
+// @Router /api/auth/login [post]
 func LoginHandler(userService *services.UserService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req LoginRequest

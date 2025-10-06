@@ -44,7 +44,7 @@ type (
 	}
 
 	LoginRequest struct {
-		Username string `json:"email" binding:"required" example:"john.doe@example.com"`
+		Username string `json:"username" binding:"required" example:"john.doe@example.com"`
 		Password string `json:"password" binding:"required" example:"secure_password"`
 	}
 

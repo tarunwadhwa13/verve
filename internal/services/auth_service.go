@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"verve/internal/auth"
 	"verve/internal/models"
 	"verve/internal/repository"
@@ -44,12 +45,17 @@ func (s *AuthService) AuthenticateLocal(username, password string) (*models.User
 
 // AuthenticateOAuth handles OAuth authentication
 func (s *AuthService) AuthenticateOAuth(userInfo *auth.OAuthUserInfo) (*models.User, string, error) {
+	// Debug log
+	fmt.Printf("AuthenticateOAuth: userInfo: %+v\n", userInfo)
+
 	// Try to find existing user by email and provider
 	user, err := s.userRepo.FindByEmailAndProvider(userInfo.Email, userInfo.Provider)
+	fmt.Printf("FindByEmailAndProvider: user: %+v, err: %v\n", user, err)
 	if err != nil {
 		// Create new user if not found
 		user = &models.User{
 			Email:           userInfo.Email,
+			Username:        userInfo.Email, // Use email as username for OAuth users
 			DisplayName:     userInfo.Name,
 			ProfilePhotoURL: userInfo.Picture,
 			Provider:        userInfo.Provider,
